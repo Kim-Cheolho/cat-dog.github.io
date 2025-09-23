@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>길드원 랭킹</title>
+    <title>길드원 랭킹 (모바일 한 줄 레이아웃)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
         :root {
@@ -16,7 +16,7 @@
             font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; background-color: var(--bg-color);
             color: var(--text-primary); display: flex; justify-content: center; align-items: center;
             padding: 40px; min-height: 100vh; box-sizing: border-box;
-            overflow-x: hidden; /* --- 추가: 화면 좌우 스크롤(움직임) 방지 --- */
+            overflow-x: hidden;
         }
         #app {
             width: 100%; max-width: 1100px; background-color: var(--primary-bg);
@@ -24,8 +24,7 @@
             padding: 30px 40px; border: 1px solid var(--border-color);
         }
         h1 { text-align: center; color: var(--text-primary); margin-bottom: 30px; font-weight: 700; }
-    
-        /* --- 기존 스타일은 변경 없음 --- */
+        
         .tabs { display: flex; border-bottom: 1px solid var(--border-color); }
         .tab-button {
             padding: 12px 25px; cursor: pointer; background: none; border: none;
@@ -40,6 +39,7 @@
         .tab-button.active::after { transform: scaleX(1); }
         .tab-content { display: none; padding: 25px 0; }
         .tab-content.active { display: block; }
+
         #json-input, #search-input {
             width: 100%; padding: 12px 15px; border: 1px solid var(--border-color);
             border-radius: 8px; background-color: var(--secondary-bg); color: var(--text-primary);
@@ -55,8 +55,9 @@
             font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.3s;
         }
         #render-button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
+
         #ranking-table { width: 100%; border-collapse: collapse; }
-        #ranking-table th, #ranking-table td { padding: 16px 10px; text-align: center; }
+        #ranking-table th, #ranking-table td { padding: 16px 10px; text-align: center; word-break: keep-all; }
         #ranking-table thead { border-bottom: 2px solid var(--border-color); }
         #ranking-table th { color: var(--text-secondary); font-size: 14px; font-weight: 500; text-transform: uppercase; }
         #ranking-table tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; }
@@ -65,49 +66,25 @@
         #ranking-table tbody tr:hover { background-color: var(--secondary-bg); }
         .status-true { color: var(--status-true); font-weight: 500; }
         .status-false { color: var(--status-false); }
-    
+
         /* ==================== 반응형 스타일 (모바일) ==================== */
         @media screen and (max-width: 768px) {
-            body { 
-                padding: 10px; 
-                align-items: flex-start;
-                font-size: 13px; /* --- 수정: 폰트 크기 추가 축소 --- */
-                line-height: 1.4; 
-            }
+            body { padding: 10px; align-items: flex-start; }
             #app { padding: 15px; }
-            h1 { font-size: 1.4rem; } 
+            h1 { font-size: 1.5rem; }
             .tab-button { padding: 10px; font-size: 1rem; flex-grow: 1; }
-            #search-input { padding: 10px 12px; }
             
-            #ranking-table thead {
-                display: none !important; 
-            }
-            #ranking-table, #ranking-table tbody, #ranking-table tr, #ranking-table td {
-                display: block; 
-                width: 100%;
-            }
-            #ranking-table tr {
-                margin-bottom: 8px; /* --- 수정: 카드 간 간격 추가 축소 --- */
-                border: 1px solid var(--border-color);
-                border-radius: 8px; 
-                background-color: rgba(0,0,0,0.2);
-            }
-            #ranking-table td {
-                display: flex; justify-content: space-between;
-                padding: 8px 12px; /* --- 수정: 카드 내 행간 추가 축소 --- */
-                text-align: right; 
-                border-bottom: 1px dashed var(--border-color);
-            }
-            #ranking-table td:last-child { border-bottom: none; }
-            #ranking-table td::before {
-                content: attr(data-label); font-weight: bold; text-align: left;
-                padding-right: 15px; color: var(--text-secondary);
+            /* 모바일에서 테이블의 글자와 여백을 줄여 한 줄에 표시 */
+            #ranking-table th, #ranking-table td {
+                padding: 12px 3px; /* 좌우 여백(padding)을 크게 줄임 */
+                font-size: 12px;   /* 폰트 크기를 줄임 */
             }
         }
     </style>
 </head>
 <body>
-    <div id="app"><h1>⚔️ 길드원 랭킹 생성기</h1>
+    <div id="app">
+        <h1>⚔️ 길드원 랭킹 생성기</h1>
         <div class="tabs">
             <button class="tab-button active" onclick="openTab('input-tab')">데이터 입력</button>
             <button class="tab-button" onclick="openTab('ranking-tab')">랭킹 조회</button>
@@ -130,6 +107,7 @@
     </div>
 
     <script>
+        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ JavaScript 변경 부분 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
         const renderButton = document.getElementById('render-button');
         const jsonInput = document.getElementById('json-input');
         const searchInput = document.getElementById('search-input');
@@ -159,7 +137,7 @@
                 const nameCell = row.children[1];
                 if (nameCell) {
                     const memberName = nameCell.textContent.toLowerCase();
-                    row.style.display = memberName.includes(searchTerm) ? '' : 'none';
+                    row.style.display = memberName.includes(searchTerm) ? '' : 'table-row';
                 }
             });
         });
@@ -170,22 +148,20 @@
             const sortedData = [...members].sort((a, b) => b.score - a.score);
 
             if (sortedData.length === 0) {
-                tableBody.innerHTML = `<tr><td data-label="알림" colspan="5">표시할 데이터가 없습니다.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="5">표시할 데이터가 없습니다.</td></tr>`;
                 return;
             }
 
             sortedData.forEach((member, index) => {
                 const row = document.createElement('tr');
 
-                // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ JavaScript 수정 부분 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
-                const createCell = (text, label, className = '') => {
+                // data-label 속성이 필요 없어졌으므로 함수를 다시 단순화합니다.
+                const createCell = (text, className = '') => {
                     const cell = document.createElement('td');
                     cell.textContent = text;
-                    cell.dataset.label = label; // 모바일 뷰에서 라벨로 사용될 data-label 속성 추가
                     if (className) cell.className = className;
                     return cell;
                 };
-                // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ JavaScript 수정 부분 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
                 const getStatus = (status, count) => ({
                     text: status == count ? '완료' : status == 0 ? '미참여' : status,
@@ -195,16 +171,16 @@
                 const dungeonStatus = getStatus(member.score_day, 5);
                 const missionStatus = getStatus(member.mission_count, 6);
 
-                // createCell 함수에 두 번째 인자로 라벨 텍스트를 전달합니다.
-                row.appendChild(createCell(index + 1, '순위'));
-                row.appendChild(createCell(member.nick, '길드원'));
-                row.appendChild(createCell(member.score.toLocaleString(), '점수'));
-                row.appendChild(createCell(dungeonStatus.text, '던전 참여', dungeonStatus.className));
-                row.appendChild(createCell(missionStatus.text, '미션 완료', missionStatus.className));
+                row.appendChild(createCell(index + 1));
+                row.appendChild(createCell(member.nick));
+                row.appendChild(createCell(member.score.toLocaleString()));
+                row.appendChild(createCell(dungeonStatus.text, dungeonStatus.className));
+                row.appendChild(createCell(missionStatus.text, missionStatus.className));
                 
                 tableBody.appendChild(row);
             });
         }
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ JavaScript 변경 부분 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
     </script>
 </body>
 </html>
