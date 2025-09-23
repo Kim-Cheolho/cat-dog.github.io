@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>길드원 랭킹 (반응형)</title>
+    <title>길드원 랭킹</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
         :root {
@@ -14,19 +14,21 @@
         }
         body {
             font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; background-color: var(--bg-color);
-            color: var(--text-primary); display: flex; justify-content: center; align-items: flex-start;
-            padding: 20px; min-height: 100vh; box-sizing: border-box;
+            color: var(--text-primary); display: flex; justify-content: center; align-items: center;
+            padding: 40px; min-height: 100vh; box-sizing: border-box;
+            overflow-x: hidden; /* --- 추가: 화면 좌우 스크롤(움직임) 방지 --- */
         }
         #app {
-            width: 100%; max-width: 900px; background-color: var(--primary-bg);
+            width: 100%; max-width: 1100px; background-color: var(--primary-bg);
             border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            padding: 20px; border: 1px solid var(--border-color);
+            padding: 30px 40px; border: 1px solid var(--border-color);
         }
-        h1 { text-align: center; color: var(--text-primary); margin-bottom: 20px; font-weight: 700; }
-
+        h1 { text-align: center; color: var(--text-primary); margin-bottom: 30px; font-weight: 700; }
+    
+        /* --- 기존 스타일은 변경 없음 --- */
         .tabs { display: flex; border-bottom: 1px solid var(--border-color); }
         .tab-button {
-            padding: 12px 20px; cursor: pointer; background: none; border: none;
+            padding: 12px 25px; cursor: pointer; background: none; border: none;
             color: var(--text-secondary); font-size: 16px; font-weight: 500;
             position: relative; transition: color 0.3s ease;
         }
@@ -36,9 +38,8 @@
         }
         .tab-button.active { color: var(--text-primary); }
         .tab-button.active::after { transform: scaleX(1); }
-        .tab-content { display: none; padding: 20px 0; }
+        .tab-content { display: none; padding: 25px 0; }
         .tab-content.active { display: block; }
-
         #json-input, #search-input {
             width: 100%; padding: 12px 15px; border: 1px solid var(--border-color);
             border-radius: 8px; background-color: var(--secondary-bg); color: var(--text-primary);
@@ -54,7 +55,6 @@
             font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.3s;
         }
         #render-button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
-
         #ranking-table { width: 100%; border-collapse: collapse; }
         #ranking-table th, #ranking-table td { padding: 16px 10px; text-align: center; }
         #ranking-table thead { border-bottom: 2px solid var(--border-color); }
@@ -63,42 +63,45 @@
         #ranking-table tbody tr:last-child { border-bottom: none; }
         #ranking-table tbody tr:nth-child(even) { background-color: rgba(0,0,0,0.2); }
         #ranking-table tbody tr:hover { background-color: var(--secondary-bg); }
-
         .status-true { color: var(--status-true); font-weight: 500; }
         .status-false { color: var(--status-false); }
-
+    
         /* ==================== 반응형 스타일 (모바일) ==================== */
         @media screen and (max-width: 768px) {
-            body { padding: 10px; align-items: flex-start; }
+            body { 
+                padding: 10px; 
+                align-items: flex-start;
+                font-size: 13px; /* --- 수정: 폰트 크기 추가 축소 --- */
+                line-height: 1.4; 
+            }
             #app { padding: 15px; }
-            h1 { font-size: 1.5em; }
-            .tab-button { padding: 10px; font-size: 14px; flex-grow: 1; }
+            h1 { font-size: 1.4rem; } 
+            .tab-button { padding: 10px; font-size: 1rem; flex-grow: 1; }
+            #search-input { padding: 10px 12px; }
             
-            #ranking-table thead { display: none; } /* 테이블 헤더 숨기기 */
+            #ranking-table thead {
+                display: none !important; 
+            }
             #ranking-table, #ranking-table tbody, #ranking-table tr, #ranking-table td {
-                display: block; /* 모든 테이블 요소를 블록으로 변경 */
+                display: block; 
                 width: 100%;
             }
             #ranking-table tr {
-                margin-bottom: 15px;
+                margin-bottom: 8px; /* --- 수정: 카드 간 간격 추가 축소 --- */
                 border: 1px solid var(--border-color);
-                border-radius: 8px;
+                border-radius: 8px; 
                 background-color: rgba(0,0,0,0.2);
             }
             #ranking-table td {
-                display: flex; /* 라벨과 값을 양쪽으로 정렬하기 위해 flex 사용 */
-                justify-content: space-between;
-                padding: 12px 15px;
-                text-align: right; /* 값(value)을 오른쪽으로 정렬 */
+                display: flex; justify-content: space-between;
+                padding: 8px 12px; /* --- 수정: 카드 내 행간 추가 축소 --- */
+                text-align: right; 
                 border-bottom: 1px dashed var(--border-color);
             }
             #ranking-table td:last-child { border-bottom: none; }
             #ranking-table td::before {
-                content: attr(data-label); /* data-label 속성값을 가져와 라벨로 사용 */
-                font-weight: bold;
-                text-align: left;
-                padding-right: 15px;
-                color: var(--text-secondary);
+                content: attr(data-label); font-weight: bold; text-align: left;
+                padding-right: 15px; color: var(--text-secondary);
             }
         }
     </style>
