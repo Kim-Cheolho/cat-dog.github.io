@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>길드원 랭킹 (POST)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #ecf0f1;
+            color: #34495e;
+            font-weight: bold;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f7f9f9;
+        }
+        .message {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚔️ 길드원 랭킹 ⚔️</h1>
+    <table id="guild-ranking">
+        <thead>
+            <tr>
+                <th>순위</th>
+                <th>길드 ID</th>
+                <th>길드 이름</th>
+                <th>점수</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.querySelector('#guild-ranking tbody');
+            
+            // [수정] URL에서 파라미터를 제거하고 기본 주소만 남깁니다.
+            const originalApiUrl = 'http://211.237.0.241/million/guild/guild_list.php';
+            const proxyUrl = 'https://corsproxy.io/?';
+            const apiUrl = proxyUrl + originalApiUrl;
+
+            function decodeUnicodeSequences(str) {
+                try {
+                    return str.replace(/\\u[\dA-F]{4}/gi, function (match) {
+                        return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16));
+                    });
+                } catch (e) {
+                    console.error("디코딩 실패:", str, e);
+                    return str;
+                }
+            }
+
+            async function fetchGuildData() {
+                tableBody.innerHTML = `<tr><td colspan="4" class="message">데이터를 불러오는 중...</td></tr>`;
+
+                // ==========================================================
+                // ### [핵심 변경] POST 요청을 위한 옵션을 설정합니다. ###
+                // ==========================================================
+                
+                // 1. POST 본문에 담을 데이터를 준비합니다.
+                const bodyData = new URLSearchParams();
+                bodyData.append('user_id', '5UxCu8RYyQfDjT7uLrp1p8t5SUN2');
+                bodyData.append('maxstage', '4606');
+
+                // 2. fetch 함수에 전달할 옵션 객체를 만듭니다.
+                const fetchOptions = {
+                    method: 'POST', // 요청 방식을 POST로 지정
+                    headers: {
+                        // 데이터 형식이 form 데이터임을 알려줍니다.
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: bodyData // 준비한 데이터를 본문에 추가
+                };
+                
+                try {
+                    // 3. fetch 호출 시 URL과 함께 옵션 객체를 전달합니다.
+                    const response = await fetch(apiUrl, fetchOptions);
+
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    
+                    if (data && data.guild_list) {
+                        renderTable(data.guild_list);
+                    } else {
+                        throw new Error('데이터 형식이 올바르지 않습니다.');
+                    }
+                } catch (error) {
+                    console.error('데이터를 불러오는 데 실패했습니다:', error);
+                    tableBody.innerHTML = `<tr><td colspan="4" class="message">데이터 로딩에 실패했습니다.</td></tr>`;
+                }
+            }
+
+            const data = {"guild_info":[{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"},{"gidx":"7","join":"A","name":"\uac1c\ubc29","icon":"2","master":"\ud53c\uc988\uae38\ub4dc\uc0dd\uc131\uc6a9","exp":"2520320","limitstage":"3149","membercount":"45","maxcount":"45","channel":"\uac1c\ubc29","notice":"\uac1c\ubc29","info":"","regdate":"2025-05-17 14:00:53","totalscore":"45764"}],"guild_member":[{"skininfo":"7","nick":"\uad50\uc591","gidx":"7","user_idx":"728","gstatus":"M","gregdate":"2025-05-17 16:58:45","lastdate":"2025-09-23 11:45:20","gcontri":"62560","mission_count":"6","score":"1433","score_day":"2"},{"skininfo":"12","nick":"\ud0dc\ub2c8","gidx":"7","user_idx":"31687","gstatus":"G","gregdate":"2025-05-17 14:01:32","lastdate":"2025-09-23 09:48:58","gcontri":"62400","mission_count":"6","score":"1564","score_day":"2"},{"skininfo":"9","nick":"\uac11\uc774","gidx":"7","user_idx":"966","gstatus":"G","gregdate":"2025-05-17 14:02:08","lastdate":"2025-09-23 00:17:03","gcontri":"61920","mission_count":"6","score":"1521","score_day":"2"},{"skininfo":"9","nick":"\uc608\uc18c\ud79b","gidx":"7","user_idx":"24542","gstatus":"G","gregdate":"2025-05-17 14:02:15","lastdate":"2025-09-23 08:40:08","gcontri":"61760","mission_count":"6","score":"1501","score_day":"2"},{"skininfo":"9","nick":"\ubc15\uc815\ud615","gidx":"7","user_idx":"39235","gstatus":"G","gregdate":"2025-05-17 14:02:22","lastdate":"2025-09-23 03:11:02","gcontri":"61920","mission_count":"6","score":"1471","score_day":"1"},{"skininfo":"9","nick":"\uc2dc\uc5d8\uc774","gidx":"7","user_idx":"3822","gstatus":"G","gregdate":"2025-05-17 14:04:51","lastdate":"2025-09-20 21:14:49","gcontri":"62160","mission_count":"0","score":"1554","score_day":"0"},{"skininfo":"7","nick":"\uba85\uc544\uc8fc","gidx":"7","user_idx":"21441","gstatus":"G","gregdate":"2025-05-17 14:05:02","lastdate":"2025-09-22 01:19:11","gcontri":"60320","mission_count":"0","score":"1482","score_day":"0"},{"skininfo":"9","nick":"\uc2dc\ud504","gidx":"7","user_idx":"85","gstatus":"G","gregdate":"2025-05-17 14:06:42","lastdate":"2025-09-23 00:26:21","gcontri":"61200","mission_count":"6","score":"1486","score_day":"1"},{"skininfo":"4","nick":"\uc800\uc2b9\uc0ac\uc790","gidx":"7","user_idx":"2157","gstatus":"G","gregdate":"2025-05-17 14:44:52","lastdate":"2025-09-23 08:21:32","gcontri":"61680","mission_count":"6","score":"1482","score_day":"2"},{"skininfo":"9","nick":"\uc21f\uac00\ub77d","gidx":"7","user_idx":"43155","gstatus":"G","gregdate":"2025-05-17 14:47:50","lastdate":"2025-09-23 05:09:51","gcontri":"61520","mission_count":"6","score":"1361","score_day":"1"},{"skininfo":"9","nick":"\ub531\ud480\uc774","gidx":"7","user_idx":"32082","gstatus":"G","gregdate":"2025-05-17 14:48:04","lastdate":"2025-09-23 09:03:24","gcontri":"61040","mission_count":"6","score":"1505","score_day":"1"},{"skininfo":"9","nick":"\ubca0\uc9c0\ud130","gidx":"7","user_idx":"1473","gstatus":"G","gregdate":"2025-05-17 14:48:20","lastdate":"2025-09-23 06:52:31","gcontri":"61520","mission_count":"6","score":"1452","score_day":"2"},{"skininfo":"8","nick":"\ud314\ucc28\uc120","gidx":"7","user_idx":"7549","gstatus":"G","gregdate":"2025-05-17 14:48:24","lastdate":"2025-09-23 07:22:15","gcontri":"60320","mission_count":"6","score":"1531","score_day":"2"},{"skininfo":"12","nick":"\uc9c0\ud1a0","gidx":"7","user_idx":"38860","gstatus":"G","gregdate":"2025-05-17 15:14:34","lastdate":"2025-09-23 13:49:00","gcontri":"61200","mission_count":"6","score":"1511","score_day":"2"},{"skininfo":"6","nick":"\ud504\ub9b0\uc2a4","gidx":"7","user_idx":"1280","gstatus":"G","gregdate":"2025-05-17 21:14:31","lastdate":"2025-09-23 07:21:21","gcontri":"62960","mission_count":"6","score":"1472","score_day":"2"},{"skininfo":"9","nick":"\uc544\uc774\uc6b0\uc5d0\uc624","gidx":"7","user_idx":"37388","gstatus":"G","gregdate":"2025-05-27 07:36:58","lastdate":"2025-09-23 06:58:17","gcontri":"57840","mission_count":"1","score":"1568","score_day":"1"},{"skininfo":"11","nick":"\ud0dc\uc778","gidx":"7","user_idx":"5442","gstatus":"G","gregdate":"2025-05-28 08:19:34","lastdate":"2025-09-23 08:33:15","gcontri":"57120","mission_count":"6","score":"1546","score_day":"2"},{"skininfo":"8","nick":"\ubaa8\uac1c","gidx":"7","user_idx":"2843","gstatus":"G","gregdate":"2025-05-28 23:01:12","lastdate":"2025-09-23 00:29:12","gcontri":"57120","mission_count":"6","score":"1501","score_day":"2"},{"skininfo":"9","nick":"\uace0\uc724\uc815e","gidx":"7","user_idx":"7300","gstatus":"G","gregdate":"2025-05-29 12:39:30","lastdate":"2025-09-23 12:27:32","gcontri":"53680","mission_count":"0","score":"1463","score_day":"2"},{"skininfo":"5","nick":"\uc804\uc7ac\uc728","gidx":"7","user_idx":"36779","gstatus":"G","gregdate":"2025-05-31 23:03:14","lastdate":"2025-09-22 23:20:18","gcontri":"53680","mission_count":"0","score":"1411","score_day":"0"},{"skininfo":"9","nick":"\uc384\uc6a9","gidx":"7","user_idx":"6360","gstatus":"G","gregdate":"2025-06-09 01:11:06","lastdate":"2025-09-21 14:37:21","gcontri":"50800","mission_count":"0","score":"1495","score_day":"0"},{"skininfo":"6","nick":"\ubb34\uc1e0","gidx":"7","user_idx":"64423","gstatus":"G","gregdate":"2025-06-22 18:48:37","lastdate":"2025-09-23 04:46:17","gcontri":"45040","mission_count":"6","score":"1431","score_day":"2"},{"skininfo":"7","nick":"\uc465\uc465\uc774\ub124","gidx":"7","user_idx":"33779","gstatus":"G","gregdate":"2025-07-02 09:07:48","lastdate":"2025-09-22 16:53:25","gcontri":"39360","mission_count":"0","score":"1492","score_day":"0"},{"skininfo":"11","nick":"\ud658\uacbd\ud30c\uad34\ubc94","gidx":"7","user_idx":"35077","gstatus":"G","gregdate":"2025-07-07 17:44:42","lastdate":"2025-09-22 22:01:20","gcontri":"37680","mission_count":"0","score":"1441","score_day":"0"},{"skininfo":"1","nick":"\uae30\uc9f1\uba4b","gidx":"7","user_idx":"33014","gstatus":"G","gregdate":"2025-07-09 22:28:47","lastdate":"2025-09-23 10:54:48","gcontri":"36560","mission_count":"6","score":"1471","score_day":"2"},{"skininfo":"12","nick":"\uace0\uc0b0\ubcd1","gidx":"7","user_idx":"44941","gstatus":"G","gregdate":"2025-07-16 22:51:22","lastdate":"2025-09-22 09:51:19","gcontri":"32480","mission_count":"0","score":"1523","score_day":"0"},{"skininfo":"2","nick":"Navi","gidx":"7","user_idx":"55829","gstatus":"G","gregdate":"2025-07-20 18:32:05","lastdate":"2025-09-22 11:18:11","gcontri":"31200","mission_count":"0","score":"1592","score_day":"0"},{"skininfo":"6","nick":"\uce58\uc640\uc640\uc640","gidx":"7","user_idx":"61231","gstatus":"G","gregdate":"2025-07-31 21:52:40","lastdate":"2025-09-23 07:54:46","gcontri":"26240","mission_count":"6","score":"1461","score_day":"1"},{"skininfo":"1","nick":"\ud638\ubd95\uc774","gidx":"7","user_idx":"7456","gstatus":"G","gregdate":"2025-08-06 23:48:53","lastdate":"2025-09-23 13:31:07","gcontri":"23440","mission_count":"6","score":"1452","score_day":"1"},{"skininfo":"12","nick":"\ucef4\uc628\ud574\ub4dc","gidx":"7","user_idx":"8400","gstatus":"G","gregdate":"2025-08-22 22:59:15","lastdate":"2025-09-23 08:33:03","gcontri":"15840","mission_count":"6","score":"1432","score_day":"2"},{"skininfo":"9","nick":"\ubbf8\ub2c8\ud074\ub808\ub4dc","gidx":"7","user_idx":"49835","gstatus":"G","gregdate":"2025-08-22 22:59:15","lastdate":"2025-09-23 07:06:58","gcontri":"15840","mission_count":"6","score":"1441","score_day":"2"},{"skininfo":"10","nick":"\ucfe0\ub85c\uce74\uc640","gidx":"7","user_idx":"30738","gstatus":"G","gregdate":"2025-08-22 23:36:36","lastdate":"2025-09-21 19:44:54","gcontri":"14400","mission_count":"0","score":"1451","score_day":"0"},{"skininfo":"6","nick":"\uc0bc\uc131\uc774\uc7ac\uc6a9","gidx":"7","user_idx":"6930","gstatus":"G","gregdate":"2025-08-24 00:27:53","lastdate":"2025-09-23 09:02:28","gcontri":"14400","mission_count":"6","score":"1439","score_day":"2"},{"skininfo":"3","nick":"\ub2cc\uc790\uc644\uc2a4","gidx":"7","user_idx":"53945","gstatus":"G","gregdate":"2025-08-24 12:29:34","lastdate":"2025-09-23 06:13:26","gcontri":"14800","mission_count":"5","score":"1441","score_day":"1"},{"skininfo":"6","nick":"\uac13\uacf5\ub8e1","gidx":"7","user_idx":"42498","gstatus":"G","gregdate":"2025-08-24 14:45:03","lastdate":"2025-09-22 05:11:33","gcontri":"13920","mission_count":"0","score":"1443","score_day":"0"},{"skininfo":"11","nick":"\uc5b5\ub178","gidx":"7","user_idx":"28762","gstatus":"G","gregdate":"2025-08-25 17:34:54","lastdate":"2025-09-22 19:03:08","gcontri":"12800","mission_count":"0","score":"1376","score_day":"0"},{"skininfo":"2","nick":"\ub9d0\ub610\ub610","gidx":"7","user_idx":"53674","gstatus":"G","gregdate":"2025-08-27 20:21:01","lastdate":"2025-09-23 11:59:26","gcontri":"12000","mission_count":"6","score":"1441","score_day":"1"},{"skininfo":"9","nick":"\ubd04\ube60","gidx":"7","user_idx":"48411","gstatus":"G","gregdate":"2025-08-31 13:53:59","lastdate":"2025-09-23 00:32:06","gcontri":"11040","mission_count":"6","score":"1464","score_day":"1"},{"skininfo":"13","nick":"\uc139\uc2dc\ub0a8","gidx":"7","user_idx":"10965","gstatus":"G","gregdate":"2025-09-01 01:06:31","lastdate":"2025-09-22 18:53:40","gcontri":"10560","mission_count":"0","score":"1491","score_day":"0"},{"skininfo":"9","nick":"\uc9c8\uc8fc","gidx":"7","user_idx":"11056","gstatus":"G","gregdate":"2025-09-01 11:34:11","lastdate":"2025-09-23 12:43:05","gcontri":"10080","mission_count":"0","score":"1465","score_day":"2"},{"skininfo":"2","nick":"FC2PPV","gidx":"7","user_idx":"8084","gstatus":"G","gregdate":"2025-09-04 19:26:34","lastdate":"2025-09-23 05:35:52","gcontri":"9600","mission_count":"6","score":"1504","score_day":"1"},{"skininfo":"8","nick":"\uc655\uc790","gidx":"7","user_idx":"382","gstatus":"G","gregdate":"2025-09-17 19:58:54","lastdate":"2025-09-23 02:26:59","gcontri":"3360","mission_count":"6","score":"1481","score_day":"1"},{"skininfo":"7","nick":"\uac1c\uc57c\uc639","gidx":"7","user_idx":"45165","gstatus":"G","gregdate":"2025-09-20 14:54:30","lastdate":"2025-09-23 10:20:53","gcontri":"1440","mission_count":"2","score":"1437","score_day":"0"},{"skininfo":"7","nick":"\ub098\ucd78\uce58\uc988","gidx":"7","user_idx":"31296","gstatus":"G","gregdate":"2025-09-22 00:14:01","lastdate":"2025-09-23 03:36:43","gcontri":"160","mission_count":"2","score":"1473","score_day":"1"},{"skininfo":"8","nick":"\uc3d8\uad7f","gidx":"7","user_idx":"66570","gstatus":"G","gregdate":"2025-09-22 16:48:20","lastdate":"2025-09-22 16:46:05","gcontri":"480","mission_count":"0","score":"1451","score_day":"0"}],"guild_wait":[{"skininfo":"7","nick":"\ud61c\ube75","gidx":"7","user_idx":"6249","gstatus":"A","gregdate":"2025-09-15 06:58:19","lastdate":"2025-09-15 06:58:19","gcontri":"0","mission_count":"0","score":"0","score_day":"0"},{"skininfo":"3","nick":"\uc5b4\ub451","gidx":"7","user_idx":"8340","gstatus":"A","gregdate":"2025-09-16 13:59:56","lastdate":"2025-09-16 13:59:56","gcontri":"0","mission_count":"0","score":"0","score_day":"0"},{"skininfo":"7","nick":"\uc258\ube48","gidx":"7","user_idx":"38887","gstatus":"A","gregdate":"2025-09-16 21:03:32","lastdate":"2025-09-16 21:03:32","gcontri":"0","mission_count":"0","score":"0","score_day":"0"}],"status":"SUCESS","msg":"\uc131\uacf5","gstatus":"G","gregdate":"2025-09-21 14:54:30","gname":"\uac1c\ubc29","gidx":"7"};
+            renderTable(data.guild_member);
+            function renderTable(data) {
+                console.log(data);
+                tableBody.innerHTML = '';
+                const sortedData = [...data].sort((a, b) => b.score - a.score);
+
+                if (sortedData.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" class="message">표시할 데이터가 없습니다.</td></tr>`;
+                    return;
+                }
+
+                sortedData.forEach((member, index) => {
+                    console.log(member);
+                    const row = document.createElement('tr');
+              //      const decodedGuildName = decodeUnicodeSequences(member.name);
+
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${member.name}</td>
+                        <td>1</td>
+                        <td>${parseInt(member.score).toLocaleString()} 점</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+          //  fetchGuildData();
+        });
+    </script>
+</body>
+</html>
