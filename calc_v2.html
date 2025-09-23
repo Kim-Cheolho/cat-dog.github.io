@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유물 만렙 다이아 계산기</title>
+<style>
+    /* ----- 폰트 & 전역 스타일 ----- */
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap');
+
+    :root {
+        --bg-color: #FFF9F2; /* 부드러운 크림색 배경 */
+        --primary-color: #A182E8; /* 메인 보라색 */
+        --danger-color: #FF9B9B;  /* 포인트 핑크색 */
+        --text-color: #4B4453;    /* 기본 텍스트 색상 */
+        --shadow-color: #B0A8B9;  /* 그림자 색상 */
+        --border-color: #DDD;
+    }
+
+    body {
+        font-family: 'Gaegu', cursive;
+        padding: 24px;
+        margin: 0;
+        max-width: 650px;
+        margin-left: auto;
+        margin-right: auto;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-size: 1.1rem; /* 기본 폰트 크기를 살짝 키움 */
+    }
+
+    /* ----- 제목 ----- */
+    h1 {
+        font-size: clamp(1.8rem, 5vw, 2.8rem);
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 24px;
+        color: var(--primary-color);
+        text-shadow: 2px 2px 0px #fff;
+		white-space: nowrap;
+    }
+
+    /* ----- 탭 스타일 ----- */
+    .tabs {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 24px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        padding: 10px 18px;
+        background: #fff;
+        border: 2px solid var(--border-color);
+        border-radius: 30px; /* 동글동글한 알약 모양 */
+        font-weight: 700;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: var(--subtle-text-color);
+        transition: all 0.2s ease-out;
+		font-family: 'Gaegu', cursive;
+    }
+
+    .tab-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 0 var(--shadow-color);
+    }
+
+    .tab-btn.active {
+        color: white;
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        box-shadow: 0 4px 0 var(--shadow-color);
+        transform: translateY(-3px);
+		font-family: 'Gaegu', cursive;
+    }
+
+    /* ----- 탭 콘텐츠 ----- */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.98); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ----- 유물 입력 영역 ----- */
+    .artifact {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        background: #fff;
+        padding: 8px 16px;
+        border-radius: 16px;
+        border: 2px solid var(--border-color);
+        box-shadow: 0 4px 0 var(--shadow-color); /* 입체적인 그림자 */
+        transition: all 0.2s ease-out;
+    }
+     .artifact:hover {
+        transform: scale(1.02);
+     }
+
+
+    label {
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+    input[type="number"] {
+        width: 100px;
+        padding: 8px;
+        font-family: 'Gaegu', cursive;
+        font-size: 1.3rem;
+        font-weight: 700;
+        text-align: center;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        background-color: var(--bg-color);
+        transition: all 0.3s ease;
+        -moz-appearance: textfield;
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"]:focus {
+        border-color: var(--primary-color);
+        background-color: #fff;
+        outline: none;
+    }
+
+    /* ----- 버튼 컨테이너 및 버튼 ----- */
+    .btn-container { text-align: center; margin: 24px 0; }
+    .btn {
+        padding: 10px 28px;
+        font-family: 'Gaegu', cursive;
+        font-size: 1.3rem;
+        font-weight: 700;
+        border-radius: 16px;
+        cursor: pointer;
+        margin: 8px 6px;
+        color: white;
+        border: none;
+        transition: all 0.1s ease-in-out;
+    }
+    .btn-primary {
+        background: var(--primary-color);
+        box-shadow: 0 6px 0 #8162c2;
+    }
+    .btn-danger {
+        background: var(--danger-color);
+        box-shadow: 0 6px 0 #d37a7a;
+    }
+    .btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 2px 0 #8162c2;
+    }
+    .btn-danger:active {
+        box-shadow: 0 2px 0 #d37a7a;
+    }
+
+    /* ----- 결과 표시 영역 ----- */
+    .result {
+        margin-top: 20px;
+        font-size: 1.2rem;
+        background: #fff;
+        padding: 24px;
+        border-radius: 16px;
+        border: 3px dashed var(--primary-color); /* 점선 테두리 */
+        box-shadow: 0 0 20px rgba(161, 130, 232, 0.2);
+    }
+    .result p {
+        margin: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 700;
+    }
+    .result p:not(:last-child) { margin-bottom: 14px; }
+    .result span {
+        font-size: 1.5rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 10px;
+    }
+    .result p:nth-child(1) span { color: #5B4F83; background-color: rgba(161, 130, 232, 0.2); }
+    .result p:nth-child(2) span { color: #C55C5C; background-color: rgba(255, 155, 155, 0.3); }
+
+    /* ----- 워터마크 ----- */
+    .watermark {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-10deg);
+        font-family: 'Gaegu', cursive;
+        font-size: clamp(4rem, 15vw, 8rem);
+        font-weight: 700;
+        color: rgba(0, 0, 0, 0.05);
+        z-index: -1;
+        pointer-events: none;
+        user-select: none;
+    }
+</style>
+
+</head>
+<body>
+    <div class="watermark">개야옹</div>
+	
+    <h1>유물 만렙 다이아 계산기</h1>
+
+    <div id="tabs-container" class="tabs"></div>
+    <div id="contents-container"></div>
+
+    <script>
+        const levelCosts = [
+            { start: 1, end: 100, cost: 1 },
+            { start: 101, end: 200, cost: 2 },
+            { start: 201, end: 300, cost: 3 },
+            { start: 301, end: 400, cost: 5 },
+            { start: 401, end: 500, cost: 7 },
+            { start: 501, end: 600, cost: 10 },
+            { start: 601, end: 700, cost: 20 },
+            { start: 701, end: 800, cost: 40 },
+            { start: 801, end: 900, cost: 70 },
+            { start: 901, end: 1000, cost: 100 },
+        ];
+
+        const artifactSets = {
+            normal: {
+                name: "일반 유물",
+                pieceCost: 60,
+                artifacts: ["광휘의 영혼","붉은 매의 수호석","황동 방패 기념비","청금석의 수호자","암흑의 심연","하늘빛 성소","성스러운 황금의 비상","성스러운 비상의 유물","자연의 수호신"]
+            },
+            advanced: {
+                name: "고급 유물",
+                pieceCost: 100,
+                artifacts: ["자연의 뿔","어둠의 영혼제사","보라빛 저주","하늘의 주관자","에메랄드의 심판","안몽의 전령","파멸의 날개"]
+            },
+            rare: {
+                name: "희귀 유물",
+                pieceCost: 180,
+                artifacts: ["재앙의 알","태양의 알","용암의 심장","심연의 괴란","염왕의 알","격노의 심장","봉인의 알","사신의 알","고대충의 알"]
+            }
+        };
+
+        function getNeededPieces(fromLevel) {
+            let total = 0;
+            for (let group of levelCosts) {
+                let s = Math.max(fromLevel + 1, group.start);
+                let e = Math.min(1000, group.end);
+                if (s <= e) total += (e - s + 1) * group.cost;
+            }
+            return total;
+        }
+
+        function createTabsAndContents() {
+            const tabsContainer = document.getElementById('tabs-container');
+            const contentsContainer = document.getElementById('contents-container');
+
+            Object.keys(artifactSets).forEach(type => {
+                const tabBtn = document.createElement('button');
+                tabBtn.className = 'tab-btn';
+                tabBtn.textContent = artifactSets[type].name;
+                tabBtn.addEventListener('click', () => showTab(type));
+                tabsContainer.appendChild(tabBtn);
+
+                const tabContent = document.createElement('div');
+                tabContent.id = `tab-${type}`;
+                tabContent.className = 'tab-content';
+                contentsContainer.appendChild(tabContent);
+
+                const inputsContainer = document.createElement('div');
+                inputsContainer.id = `inputs-${type}`;
+                tabContent.appendChild(inputsContainer);
+
+                artifactSets[type].artifacts.forEach((name, i) => {
+                    const artifactDiv = document.createElement('div');
+                    artifactDiv.className = 'artifact';
+                    artifactDiv.innerHTML = `
+                        <label for="${type}-level${i}">${name} (0~1000)</label>
+                        <input type="number" id="${type}-level${i}" min="0" max="1000" value="0">
+                    `;
+                    inputsContainer.appendChild(artifactDiv);
+
+                    const input = document.getElementById(`${type}-level${i}`);
+                    const saved = localStorage.getItem(`${type}_level_${i}`);
+                    if (saved !== null) {
+                        input.value = saved;
+                    }
+                    input.addEventListener("input", (e) => {
+                        let value = e.target.value;
+                        // 앞의 0을 제거하는 로직
+                        if (value.length > 1 && value.startsWith('0')) {
+                            value = value.replace(/^0+/, '');
+                            e.target.value = value;
+                        }
+
+                        // 1000을 초과하면 1000으로 설정하는 로직 추가
+                        if (parseInt(value) > 1000) {
+                            e.target.value = 1000;
+                            value = 1000;
+                        }
+
+                        localStorage.setItem(`${type}_level_${i}`, value);
+                        calculate(type);
+                    });
+                });
+
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'btn-container';
+                btnContainer.innerHTML = `
+                    <button class="btn btn-primary" onclick="calculate('${type}')">계산하기</button>
+                    <button class="btn btn-danger" onclick="clearSaved('${type}')">저장 초기화</button>
+                `;
+                tabContent.appendChild(btnContainer);
+
+                const resultDiv = document.createElement('div');
+                resultDiv.id = `result-${type}`;
+                resultDiv.className = 'result';
+                tabContent.appendChild(resultDiv);
+            });
+        }
+
+        function calculate(type) {
+            const artifactInfo = artifactSets[type];
+            if (!artifactInfo) return;
+
+            let totalNeededPieces = 0;
+            const artifactCount = artifactInfo.artifacts.length;
+            
+            for (let i = 0; i < artifactCount; i++) {
+                let level = parseInt(document.getElementById(`${type}-level${i}`).value);
+                if (isNaN(level) || level < 0 || level > 1000) level = 0;
+                totalNeededPieces += getNeededPieces(level);
+            }
+            
+            const pieceCost = artifactInfo.pieceCost;
+            const totalDiamondsNeeded = totalNeededPieces * pieceCost;
+            
+            const oneItemFullCost = getNeededPieces(0) * pieceCost;
+            const totalFull = oneItemFullCost * artifactCount;
+            const totalUsed = totalFull - totalDiamondsNeeded;
+
+            const resultElement = document.getElementById(`result-${type}`);
+            if (resultElement) {
+                resultElement.innerHTML = `
+                    <p>소모한 다이아 : <span style="color: #1a73e8;">${totalUsed.toLocaleString()}</span>개</p>
+                    <p>필요한 다이아 : <span style="color: #e94e4e;">${totalDiamondsNeeded.toLocaleString()}</span>개</p>
+                `;
+            }
+        }
+
+        function clearSaved(type) {
+            const artifacts = artifactSets[type].artifacts;
+            artifacts.forEach((_, i) => {
+                localStorage.removeItem(`${type}_level_${i}`);
+                const input = document.getElementById(`${type}-level${i}`);
+                if (input) {
+                    input.value = 0;
+                }
+            });
+			localStorage.removeItem('activeTab');
+            calculate(type);
+        }
+
+        function showTab(type) {
+            document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+
+            const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.textContent === artifactSets[type].name);
+            if (activeBtn) activeBtn.classList.add("active");
+            
+            const activeTab = document.getElementById(`tab-${type}`);
+            if (activeTab) activeTab.classList.add("active");
+
+            localStorage.setItem('activeTab', type);
+        }
+		
+        window.addEventListener('DOMContentLoaded', () => {
+            createTabsAndContents();
+			const firstType = Object.keys(artifactSets)[Object.keys(artifactSets).length -1]; // 객체의 마지막 키를 가져옴
+			const lastActiveTab = localStorage.getItem('activeTab') || firstType;
+            showTab(lastActiveTab);
+            Object.keys(artifactSets).forEach(type => calculate(type));
+        });
+    </script>
+</body>
+</html>
