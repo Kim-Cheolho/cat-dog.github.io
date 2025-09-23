@@ -61,9 +61,7 @@
             const tableBody = document.querySelector('#guild-ranking tbody');
             
             // [수정] URL에서 파라미터를 제거하고 기본 주소만 남깁니다.
-            const originalApiUrl = 'http://211.237.0.241/million/guild/guild_list.php';
-            const proxyUrl = 'https://corsproxy.io/?';
-            const apiUrl = proxyUrl + originalApiUrl;
+            const apiUrl = 'http://211.237.0.241/million/guild/guild_list.php';
 
             function decodeUnicodeSequences(str) {
                 try {
