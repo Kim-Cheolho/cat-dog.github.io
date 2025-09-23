@@ -3,84 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>길드원 랭킹 (모바일 한 줄 레이아웃)</title>
+    <title>길드원 랭킹 (UI 개선)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
-        :root {
-            --bg-color: #111827; --primary-bg: #1F2937; --secondary-bg: #374151;
-            --border-color: #4B5563; --text-primary: #F9FAFB; --text-secondary: #D1D5DB;
-            --accent-gradient: linear-gradient(90deg, #3B82F6, #8B5CF6); --accent-color-1: #3B82F6;
-            --status-true: #10B981; --status-false: #EF4444;
-        }
-        body {
-            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; background-color: var(--bg-color);
-            color: var(--text-primary); display: flex; justify-content: center; align-items: center;
-            padding: 40px; min-height: 100vh; box-sizing: border-box;
-            overflow-x: hidden;
-        }
-        #app {
-            width: 100%; max-width: 1100px; background-color: var(--primary-bg);
-            border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            padding: 30px 40px; border: 1px solid var(--border-color);
-        }
-        h1 { text-align: center; color: var(--text-primary); margin-bottom: 30px; font-weight: 700; }
-        
-        .tabs { display: flex; border-bottom: 1px solid var(--border-color); }
-        .tab-button {
-            padding: 12px 25px; cursor: pointer; background: none; border: none;
-            color: var(--text-secondary); font-size: 16px; font-weight: 500;
-            position: relative; transition: color 0.3s ease;
-        }
-        .tab-button::after {
-            content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 3px;
-            background: var(--accent-gradient); transform: scaleX(0); transition: transform 0.3s ease;
-        }
-        .tab-button.active { color: var(--text-primary); }
-        .tab-button.active::after { transform: scaleX(1); }
-        .tab-content { display: none; padding: 25px 0; }
-        .tab-content.active { display: block; }
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+    :root {
+        --bg-color: #111827; --primary-bg: #1F2937; --secondary-bg: #374151;
+        --border-color: #4B5563; --text-primary: #F9FAFB; --text-secondary: #D1D5DB;
+        --accent-gradient: linear-gradient(90deg, #3B82F6, #8B5CF6); --accent-color-1: #3B82F6;
+        --status-true: #10B981; --status-false: #EF4444;
+    }
+    body {
+        font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; background-color: var(--bg-color);
+        color: var(--text-primary); display: flex; justify-content: center; align-items: center;
+        padding: 40px; min-height: 100vh; box-sizing: border-box;
+        overflow-x: hidden;
+    }
+    #app {
+        width: 100%; max-width: 1100px; background-color: var(--primary-bg);
+        border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        padding: 30px 40px; border: 1px solid var(--border-color);
+    }
+    h1 { text-align: center; color: var(--text-primary); margin-bottom: 30px; font-weight: 700; }
 
-        #json-input, #search-input {
-            width: 100%; padding: 12px 15px; border: 1px solid var(--border-color);
-            border-radius: 8px; background-color: var(--secondary-bg); color: var(--text-primary);
-            font-size: 15px; box-sizing: border-box; transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        #json-input { min-height: 200px; font-family: Consolas, monospace; }
-        #json-input:focus, #search-input:focus {
-            outline: none; border-color: var(--accent-color-1); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
-        }
-        #render-button {
-            display: block; width: 100%; padding: 14px; margin-top: 15px;
-            background: var(--accent-gradient); color: white; border: none; border-radius: 8px;
-            font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.3s;
-        }
-        #render-button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
+    .tabs { display: flex; border-bottom: 1px solid var(--border-color); }
+    .tab-button {
+        padding: 12px 25px; cursor: pointer; background-color: transparent;
+        border: none; border-radius: 8px 8px 0 0; color: var(--text-secondary);
+        font-size: 16px; font-weight: 500; position: relative;
+        transition: color 0.3s ease, background-color 0.3s ease;
+    }
+    .tab-button:hover { color: var(--text-primary); background-color: rgba(255, 255, 255, 0.05); }
+    .tab-button.active { color: var(--text-primary); background-color: var(--secondary-bg); }
+    .tab-button::after {
+        content: ''; position: absolute; bottom: -1px; left: 0; width: 100%;
+        height: 3px; background: var(--accent-gradient); transform: scaleX(0);
+        transform-origin: left; transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .tab-button.active::after { transform: scaleX(1); }
 
-        #ranking-table { width: 100%; border-collapse: collapse; }
-        #ranking-table th, #ranking-table td { padding: 16px 10px; text-align: center; word-break: keep-all; }
-        #ranking-table thead { border-bottom: 2px solid var(--border-color); }
-        #ranking-table th { color: var(--text-secondary); font-size: 14px; font-weight: 500; text-transform: uppercase; }
-        #ranking-table tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; }
-        #ranking-table tbody tr:last-child { border-bottom: none; }
-        #ranking-table tbody tr:nth-child(even) { background-color: rgba(0,0,0,0.2); }
-        #ranking-table tbody tr:hover { background-color: var(--secondary-bg); }
-        .status-true { color: var(--status-true); font-weight: 500; }
-        .status-false { color: var(--status-false); }
+    .tab-content { display: none; padding: 25px 0; }
+    .tab-content.active { display: block; }
+    
+    /* ▼▼▼▼▼ 엑셀 업로드 CSS 수정됨 ▼▼▼▼▼ */
+    .file-upload-area {
+        display: flex; flex-direction: column; justify-content: center;
+        align-items: center; gap: 12px; min-height: 120px;
+        margin-bottom: 15px; border: 2px dashed var(--border-color);
+        border-radius: 12px; padding: 10px; text-align: center;
+        cursor: pointer; background-color: var(--secondary-bg);
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+    .file-upload-area:hover, .file-upload-area.dragover {
+        background-color: #4B5563; border-color: var(--accent-color-1);
+    }
+    .upload-icon {
+        width: 40px; height: 40px; stroke-width: 1.5;
+        color: var(--text-secondary); transition: color 0.3s;
+    }
+    .file-upload-area:hover .upload-icon, .file-upload-area.dragover .upload-icon {
+        color: var(--accent-color-1);
+    }
+    #file-upload-label {
+        color: var(--text-primary); font-weight: 500; font-size: 16px;
+    }
+    .upload-hint { color: var(--text-secondary); font-size: 13px; }
+    #excel-upload { display: none; }
+    /* ▲▲▲▲▲ 엑셀 업로드 CSS 수정됨 ▲▲▲▲▲ */
+    
+    .search-and-download { display: flex; gap: 10px; margin-bottom: 10px; }
+    #search-input { flex-grow: 1; margin-bottom: 0; }
+    #download-excel {
+        padding: 10px 20px; background: var(--status-true); color: white;
+        border: none; border-radius: 8px; font-size: 15px; font-weight: 500;
+        cursor: pointer; white-space: nowrap; transition: background-color 0.3s;
+    }
+    #download-excel:hover { background-color: #059669; }
+    
+    .filters-wrapper { display: flex; gap: 20px; margin-bottom: 15px; }
+    .filter-area { display: flex; align-items: center; gap: 8px; }
+    .filter-area input[type="checkbox"] { cursor: pointer; }
+    .filter-area label { cursor: pointer; color: var(--text-secondary); }
+    
+    #json-input, #search-input {
+        width: 100%; padding: 12px 15px; border: 1px solid var(--border-color);
+        border-radius: 8px; background-color: var(--secondary-bg); color: var(--text-primary);
+        font-size: 15px; box-sizing: border-box;
+    }
+    #json-input { min-height: 150px; font-family: Consolas, monospace; }
+    #json-input:focus, #search-input:focus {
+        outline: none; border-color: var(--accent-color-1); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+    }
+    #render-button {
+        display: block; width: 100%; padding: 14px; margin-top: 15px;
+        background: var(--accent-gradient); color: white; border: none; border-radius: 8px;
+        font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.3s;
+    }
+    #render-button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
+    
+    #ranking-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    #ranking-table thead { border-bottom: 2px solid var(--border-color); }
+    #ranking-table th { color: var(--text-secondary); font-size: 14px; font-weight: 500; text-transform: uppercase; padding: 16px 10px; }
+    #ranking-table td { padding: 16px 10px; text-align: center; word-break: keep-all; }
+    #ranking-table tbody tr { transition: background-color 0.2s; }
+    #ranking-table tbody tr:nth-child(odd) { background-color: var(--primary-bg); }
+    #ranking-table tbody tr:nth-child(even) { background-color: var(--secondary-bg); }
+    #ranking-table tbody tr:hover { background-color: #4A5568; }
+    .status-completed { color: var(--status-true); font-weight: 500; }
+    .status-not-participated, .status-partial { color: var(--status-false); font-weight: 500; }
 
-        /* ==================== 반응형 스타일 (모바일) ==================== */
-        @media screen and (max-width: 768px) {
-            body { padding: 10px; align-items: flex-start; }
-            #app { padding: 15px; }
-            h1 { font-size: 1.5rem; }
-            .tab-button { padding: 10px; font-size: 1rem; flex-grow: 1; }
-            
-            /* 모바일에서 테이블의 글자와 여백을 줄여 한 줄에 표시 */
-            #ranking-table th, #ranking-table td {
-                padding: 12px 3px; /* 좌우 여백(padding)을 크게 줄임 */
-                font-size: 12px;   /* 폰트 크기를 줄임 */
-            }
-        }
-    </style>
+    @media screen and (max-width: 768px) {
+        body { padding: 10px; align-items: flex-start; }
+        #app { padding: 15px; }
+        #ranking-table th, #ranking-table td { padding: 12px 3px; font-size: 12px; }
+    }
+</style>
 </head>
 <body>
     <div id="app">
@@ -89,12 +126,37 @@
             <button class="tab-button active" onclick="openTab('input-tab')">데이터 입력</button>
             <button class="tab-button" onclick="openTab('ranking-tab')">랭킹 조회</button>
         </div>
+
         <div id="input-tab" class="tab-content active">
-            <textarea id="json-input" placeholder="여기에 JSON 데이터를 붙여넣으세요."></textarea>
+            <textarea id="json-input" placeholder="여기에 오늘 날짜의 JSON 데이터를 붙여넣으세요."></textarea>
             <button id="render-button">📊 랭킹 생성</button>
         </div>
+
         <div id="ranking-tab" class="tab-content">
-            <input type="text" id="search-input" placeholder="길드원 이름으로 검색...">
+            <label for="excel-upload" class="file-upload-area">
+                <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3.75 3.75M12 9.75l3.75 3.75M3.75 18A9 9 0 0121 9a8.988 8.988 0 01-1.305 4.803" />
+                </svg>
+                <span id="file-upload-label">엑셀 파일 업로드</span>
+                <span class="upload-hint">파일을 드래그하거나 여기를 클릭하세요.</span>
+            </label>
+            <input type="file" id="excel-upload" accept=".xlsx, .xls">
+            <div class="search-and-download">
+                <input type="text" id="search-input" placeholder="길드원 이름으로 검색...">
+                <button id="download-excel">💾 엑셀로 저장</button>
+            </div>
+            
+            <div class="filters-wrapper">
+                <div class="filter-area">
+                    <input type="checkbox" id="filter-dungeon-incomplete">
+                    <label for="filter-dungeon-incomplete">던전 미완료만 보기</label>
+                </div>
+                <div class="filter-area">
+                    <input type="checkbox" id="filter-mission-incomplete">
+                    <label for="filter-mission-incomplete">미션 미완료만 보기</label>
+                </div>
+            </div>
+            
             <table id="ranking-table">
                 <thead>
                     <tr>
@@ -107,11 +169,27 @@
     </div>
 
     <script>
-        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ JavaScript 변경 부분 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
         const renderButton = document.getElementById('render-button');
         const jsonInput = document.getElementById('json-input');
         const searchInput = document.getElementById('search-input');
         const tableBody = document.getElementById('ranking-body');
+        const downloadBtn = document.getElementById('download-excel');
+        const uploadInput = document.getElementById('excel-upload');
+        const dungeonFilterCheckbox = document.getElementById('filter-dungeon-incomplete');
+        const missionFilterCheckbox = document.getElementById('filter-mission-incomplete');
+
+        // ▼▼▼▼▼ JavaScript 수정됨 ▼▼▼▼▼
+        const uploadLabel = document.getElementById('file-upload-label');
+        const uploadHint = document.querySelector('.upload-hint');
+        const fileUploadArea = document.querySelector('.file-upload-area');
+        // ▲▲▲▲▲ JavaScript 수정됨 ▲▲▲▲▲
+
+        let uploadedData = null; 
+        let currentJsonData = null; 
+
+        searchInput.addEventListener('input', applyFilters);
+        dungeonFilterCheckbox.addEventListener('change', applyFilters);
+        missionFilterCheckbox.addEventListener('change', applyFilters);
 
         function openTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -120,67 +198,232 @@
             event.currentTarget.classList.add('active');
         }
 
+        // ▼▼▼▼▼ JavaScript 수정됨 ▼▼▼▼▼
+        uploadInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            uploadLabel.textContent = `업로드 중...`;
+            uploadHint.textContent = file.name;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, cellDates: true });
+                    uploadedData = rawData.map(row => row.map(cell => formatDate(cell)));
+                    uploadLabel.textContent = `✅ 업로드 완료`;
+                    alert('엑셀 파일이 성공적으로 업로드되었습니다.');
+                } catch (err) {
+                    alert('엑셀 파일을 읽는 중 오류가 발생했습니다.');
+                    uploadLabel.textContent = '엑셀 파일 업로드';
+                    uploadHint.textContent = '파일 업로드 실패. 다시 시도하세요.';
+                    console.error(err);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileUploadArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileUploadArea.addEventListener(eventName, () => {
+                fileUploadArea.classList.add('dragover');
+            }, false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileUploadArea.addEventListener(eventName, () => {
+                fileUploadArea.classList.remove('dragover');
+            }, false);
+        });
+        // ▲▲▲▲▲ JavaScript 수정됨 ▲▲▲▲▲
+
+        function excelSerialDateToJSDate(serial) {
+            const utc_days  = Math.floor(serial - 25569);
+            const utc_value = utc_days * 86400;
+            const date_info = new Date(utc_value * 1000);
+            return new Date(date_info.getTime() + (date_info.getTimezoneOffset() * 60 * 1000));
+        }
+
+        function formatDate(cellValue) {
+            let date = cellValue;
+            if (typeof cellValue === 'number' && cellValue > 25569) {
+                date = excelSerialDateToJSDate(cellValue);
+            }
+            if (date instanceof Date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            return cellValue;
+        }
+
         renderButton.addEventListener('click', () => {
             const jsonData = jsonInput.value;
             if (!jsonData.trim()) { alert('JSON 데이터를 입력해주세요.'); return; }
             try {
                 const members = JSON.parse(jsonData);
-                renderRanking(members.guild_member);
+                currentJsonData = members.guild_member;
+                renderRanking(currentJsonData);
                 document.querySelector('.tab-button[onclick*="ranking-tab"]').click();
             } catch (error) { alert('올바른 JSON 형식이 아닙니다. 데이터를 확인해주세요.'); }
         });
 
-        searchInput.addEventListener('input', (event) => {
-            const searchTerm = event.target.value.toLowerCase();
-            const rows = tableBody.querySelectorAll('tr');
-            rows.forEach(row => {
-                const nameCell = row.children[1];
-                if (nameCell) {
-                    const memberName = nameCell.textContent.toLowerCase();
-                    row.style.display = memberName.includes(searchTerm) ? '' : 'table-row';
-                }
-            });
+        downloadBtn.addEventListener('click', () => {
+            if (!currentJsonData) {
+                alert('먼저 JSON 데이터로 랭킹을 생성해주세요.');
+                return;
+            }
+            downloadAsXLSX();
         });
 
         function renderRanking(members) {
             tableBody.innerHTML = '';
-            if (!Array.isArray(members)) { alert('데이터는 배열 형태여야 합니다.'); return; }
             const sortedData = [...members].sort((a, b) => b.score - a.score);
 
-            if (sortedData.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="5">표시할 데이터가 없습니다.</td></tr>`;
-                return;
-            }
+            const createCell = (text, className = '') => {
+                const cell = document.createElement('td');
+                cell.textContent = text;
+                if (className) {
+                    cell.className = className;
+                }
+                return cell;
+            };
+
+            const getStatusData = (type, status, count) => {
+                return { 
+                    text : status == count ? '완료' : status == 0 ? '미참여' : status,
+                    className : status == count ? 'status-completed' : 'status-not-participated'
+                }
+            };
 
             sortedData.forEach((member, index) => {
                 const row = document.createElement('tr');
-
-                // data-label 속성이 필요 없어졌으므로 함수를 다시 단순화합니다.
-                const createCell = (text, className = '') => {
-                    const cell = document.createElement('td');
-                    cell.textContent = text;
-                    if (className) cell.className = className;
-                    return cell;
-                };
-
-                const getStatus = (status, count) => ({
-                    text: status == count ? '완료' : status == 0 ? '미참여' : status,
-                    className: status == count ? 'status-true' : 'status-false'
-                });
                 
-                const dungeonStatus = getStatus(member.score_day, 5);
-                const missionStatus = getStatus(member.mission_count, 6);
+                const dungeonStatus = getStatusData('score', member.score_day, 5);
+                const missionStatus = getStatusData('mission', member.mission_count, 6);
 
                 row.appendChild(createCell(index + 1));
                 row.appendChild(createCell(member.nick));
-                row.appendChild(createCell(member.score.toLocaleString()));
-                row.appendChild(createCell(dungeonStatus.text, dungeonStatus.className));
+                row.appendChild(createCell(member.score));
+                if ( missionStatus.text == '완료') { //미션이 완료된 경우 횟수 상관없이 완료
+                    row.appendChild(createCell(missionStatus.text, missionStatus.className));
+                } else {
+                    row.appendChild(createCell(dungeonStatus.text, dungeonStatus.className));
+                }
                 row.appendChild(createCell(missionStatus.text, missionStatus.className));
                 
                 tableBody.appendChild(row);
             });
+            applyFilters();
         }
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ JavaScript 변경 부분 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        
+        function applyFilters() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const showOnlyDungeonIncomplete = dungeonFilterCheckbox.checked;
+            const showOnlyMissionIncomplete = missionFilterCheckbox.checked;
+            const rows = tableBody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const nameCell = row.children[1];
+                const dungeonCell = row.children[3];
+                const missionCell = row.children[4];
+                if (!nameCell || !dungeonCell || !missionCell) return;
+
+                const nameMatch = nameCell.textContent.toLowerCase().includes(searchTerm);
+                const isDungeonIncomplete = dungeonCell.textContent !== '완료';
+                const dungeonMatch = !showOnlyDungeonIncomplete || isDungeonIncomplete;
+                const isMissionIncomplete = missionCell.textContent !== '완료';
+                const missionMatch = !showOnlyMissionIncomplete || isMissionIncomplete;
+
+                if (nameMatch && dungeonMatch && missionMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function downloadAsXLSX() {
+            const today = new Date();
+            const todayString = formatDate(today);
+            const memberMap = new Map();
+            let dateHeaders = [];
+
+            if (uploadedData && uploadedData.length > 0) {
+                const oldHeaders = uploadedData[0];
+                const nameIndex = oldHeaders.indexOf('길드원');
+                dateHeaders = oldHeaders.filter(h => typeof h === 'string' && h.match(/^\d{4}-\d{2}-\d{2}$/));
+                for (let i = 1; i < uploadedData.length; i++) {
+                    const row = uploadedData[i];
+                    const name = row[nameIndex];
+                    if (!name) continue;
+                    const memberData = {};
+                    dateHeaders.forEach(date => {
+                        const dateIndex = oldHeaders.indexOf(date);
+                        memberData[date] = row[dateIndex];
+                    });
+                    memberMap.set(name, memberData);
+                }
+            }
+
+            if (!dateHeaders.includes(todayString)) {
+                dateHeaders.push(todayString);
+            }
+
+            const sortedNewData = [...currentJsonData].sort((a, b) => b.score - a.score);
+            sortedNewData.forEach(newMember => {
+                const name = newMember.nick;
+                const score = newMember.score;
+                if (!memberMap.has(name)) {
+                    memberMap.set(name, {});
+                }
+                memberMap.get(name)[todayString] = score;
+            });
+
+            const finalHeaders = ['길드원', ...dateHeaders, '', '일간 증가량', '주간 증가량', '오늘 순위'];
+            const finalData = [finalHeaders];
+
+            const todayRankMap = new Map();
+            sortedNewData.forEach((member, index) => {
+                todayRankMap.set(member.nick, index + 1);
+            });
+            
+            const allMembers = Array.from(memberMap.keys()).sort();
+            allMembers.forEach((name, index) => {
+                const memberData = memberMap.get(name);
+                const row = [name];
+                
+                dateHeaders.forEach(date => {
+                    row.push(memberData[date] || 0);
+                });
+                
+                row.push('');
+
+                const excelRowIndex = index + 2;
+
+                const dailyIncreaseFormula = `IF(ISBLANK(OFFSET(A${excelRowIndex}, 0, COUNTA($1:$1)-5)), "미입력", OFFSET(A${excelRowIndex}, 0, COUNTA($1:$1)-5)-OFFSET(A${excelRowIndex}, 0, COUNTA($1:$1)-6))`;
+                const weeklyIncreaseFormula = `IF(ISBLANK(OFFSET(A${excelRowIndex}, 0, COUNTA($1:$1)-5)), "미입력", IFERROR(OFFSET(A${excelRowIndex}, 0, COUNTA($1:$1)-5)-HLOOKUP(TODAY()-WEEKDAY(TODAY(),2)+1, $B$1:$Y$50, ROW(A${excelRowIndex}), FALSE), OFFSET(A${excelRowIndex}, 0, COUNTA($1:$1)-5)-B${excelRowIndex}))`;
+
+                row.push({ f: dailyIncreaseFormula });
+                row.push({ f: weeklyIncreaseFormula });
+                row.push(todayRankMap.get(name) || '');
+
+                finalData.push(row);
+            });
+
+            const worksheet = XLSX.utils.aoa_to_sheet(finalData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, '길드원 점수 추적');
+            XLSX.writeFile(workbook, `guild_ranking_history_${todayString}.xlsx`);
+        }
     </script>
 </body>
 </html>
