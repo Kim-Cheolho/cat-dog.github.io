@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>POST 요청 예제</title>
+</head>
+<body>
+
+    <h2>길드 목록 요청</h2>
+    <p>아래 버튼을 클릭하여 POST 요청을 보냅니다.</p>
+
+    <form id="autoSubmitForm" action="http://211.237.0.241/million/guild/guild_list.php" method="post">
+        <input type="hidden" name="user_id" value="5UxCu8RYyQfDjT7uLrp1p8t5SUN2">
+		<input type="hidden" name="maxstage" value="4606">
+
+        <input type="submit" value="요청 보내기">
+    </form>
+
+    <script>
+        // 페이지의 모든 콘텐츠가 로드된 후 즉시 'autoSubmitForm' ID를 가진 폼을 제출합니다.
+        document.getElementById('autoSubmitForm').submit();
+    </script>
+
+</body>
+</html>
